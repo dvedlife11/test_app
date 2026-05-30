@@ -42,5 +42,19 @@ post_install do |installer|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
       config.build_settings['INFOPLIST_KEY_NSMicrophoneUsageDescription'] = 'This app uses the microphone so you can record your affirmation audio sessions.'
     end
+
+    # Patch pod Info.plist files directly to include NSMicrophoneUsageDescription
+    if target.name != 'Pods'
+      target.build_configurations.each do |config|
+        plist_path = "#{installer.sandbox.root}/#{target.name}/#{target.name}-Info.plist"
+        next unless File.exist?(plist_path)
+
+        plist_content = File.read(plist_path)
+        unless plist_content.include?('NSMicrophoneUsageDescription')
+          plist_content = plist_content.sub('</dict>', "\n\t<key>NSMicrophoneUsageDescription</key>\n\t<string>This app uses the microphone so you can record your affirmation audio sessions.</string>\n</dict>")
+          File.write(plist_path, plist_content)
+        end
+      end
+    end
   end
 end
