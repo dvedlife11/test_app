@@ -34,31 +34,7 @@ workflows:
         script: flutter precache --ios
       - name: Inject privacy manifest for Flutter.framework
         script: |
-          cat > /tmp/PrivacyInfo.xcprivacy <<'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>NSPrivacyTracking</key>
-  <false/>
-  <key>NSPrivacyTrackingDomains</key>
-  <array/>
-  <key>NSPrivacyCollectedDataTypes</key>
-  <array/>
-  <key>NSPrivacyAccessedAPITypes</key>
-  <array>
-    <dict>
-      <key>NSPrivacyAccessedAPIType</key>
-      <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
-      <key>NSPrivacyAccessedAPITypeReasons</key>
-      <array>
-        <string>CA92.1</string>
-      </array>
-    </dict>
-  </array>
-</dict>
-</plist>
-EOF
+          cp codemagic/PrivacyInfo.xcprivacy /tmp/PrivacyInfo.xcprivacy
 
           COUNT=0
           while IFS= read -r FRAMEWORK_DIR; do
@@ -111,25 +87,8 @@ EOF
         script: |
           xcode-project use-profiles
           PROFILE_NAME=$(cat /tmp/profile_name.txt)
-          cat > /tmp/export_options.plist << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>app-store</string>
-            <key>teamID</key>
-            <string>S2U8DTP342</string>
-            <key>signingStyle</key>
-            <string>manual</string>
-            <key>provisioningProfiles</key>
-            <dict>
-              <key>com.thebone.test</key>
-              <string>${PROFILE_NAME}</string>
-            </dict>
-          </dict>
-          </plist>
-          EOF
+          cp codemagic/export_options.template.plist /tmp/export_options.plist
+          /usr/libexec/PlistBuddy -c "Set :provisioningProfiles:com.thebone.test ${PROFILE_NAME}" /tmp/export_options.plist
       - name: Build signed IPA
         script: |
           flutter build ipa --release \
@@ -144,31 +103,7 @@ EOF
           echo "App path: $APP_PATH"
           PLIST="$APP_PATH/Info.plist"
 
-          cat > /tmp/PrivacyInfo.xcprivacy <<'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>NSPrivacyTracking</key>
-  <false/>
-  <key>NSPrivacyTrackingDomains</key>
-  <array/>
-  <key>NSPrivacyCollectedDataTypes</key>
-  <array/>
-  <key>NSPrivacyAccessedAPITypes</key>
-  <array>
-    <dict>
-      <key>NSPrivacyAccessedAPIType</key>
-      <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
-      <key>NSPrivacyAccessedAPITypeReasons</key>
-      <array>
-        <string>CA92.1</string>
-      </array>
-    </dict>
-  </array>
-</dict>
-</plist>
-EOF
+          cp codemagic/PrivacyInfo.xcprivacy /tmp/PrivacyInfo.xcprivacy
 
           cp /tmp/PrivacyInfo.xcprivacy "$APP_PATH/PrivacyInfo.xcprivacy"
 
@@ -178,6 +113,15 @@ EOF
             echo "Injected manifest into $FRAMEWORK_PATH"
           else
             echo "WARNING: Flutter.framework not found in app bundle at $FRAMEWORK_PATH"
+          fi
+
+          SQFLITE_FRAMEWORK_PATH="$APP_PATH/Frameworks/sqflite.framework"
+          if [ -d "$SQFLITE_FRAMEWORK_PATH" ]; then
+            cp /tmp/PrivacyInfo.xcprivacy "$SQFLITE_FRAMEWORK_PATH/PrivacyInfo.xcprivacy"
+            echo "Injected manifest into $SQFLITE_FRAMEWORK_PATH"
+          else
+            echo "ERROR: sqflite.framework not found in app bundle at $SQFLITE_FRAMEWORK_PATH"
+            exit 1
           fi
 
           /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 'This app uses the microphone so you can record your affirmation audio sessions.'" "$PLIST" 2>/dev/null || \
@@ -208,6 +152,7 @@ EOF
           INFO_PLIST="$TEMP_DIR/Payload/Runner.app/Info.plist"
           APP_MANIFEST="$TEMP_DIR/Payload/Runner.app/PrivacyInfo.xcprivacy"
           FLUTTER_MANIFEST="$TEMP_DIR/Payload/Runner.app/Frameworks/Flutter.framework/PrivacyInfo.xcprivacy"
+          SQFLITE_MANIFEST="$TEMP_DIR/Payload/Runner.app/Frameworks/sqflite.framework/PrivacyInfo.xcprivacy"
 
           if [ ! -f "$INFO_PLIST" ]; then
             echo "ERROR: Info.plist not found in IPA"
@@ -221,6 +166,50 @@ EOF
 
           if [ ! -f "$FLUTTER_MANIFEST" ]; then
             echo "ERROR: PrivacyInfo.xcprivacy missing from Flutter.framework"
+            exit 1
+          fi
+
+          if [ ! -f "$SQFLITE_MANIFEST" ]; then
+            echo "ERROR: PrivacyInfo.xcprivacy missing from sqflite.framework"
+            exit 1
+          fi
+
+          echo "Checking NSUserDefaults privacy declaration in app manifest..."
+          if ! grep -q "NSPrivacyAccessedAPICategoryUserDefaults" "$APP_MANIFEST"; then
+            echo "ERROR: Runner.app manifest missing NSPrivacyAccessedAPICategoryUserDefaults"
+            cat "$APP_MANIFEST"
+            exit 1
+          fi
+
+          if ! grep -q "CA92.1" "$APP_MANIFEST"; then
+            echo "ERROR: Runner.app manifest missing reason CA92.1"
+            cat "$APP_MANIFEST"
+            exit 1
+          fi
+
+          echo "Checking NSUserDefaults privacy declaration in Flutter.framework manifest..."
+          if ! grep -q "NSPrivacyAccessedAPICategoryUserDefaults" "$FLUTTER_MANIFEST"; then
+            echo "ERROR: Flutter.framework manifest missing NSPrivacyAccessedAPICategoryUserDefaults"
+            cat "$FLUTTER_MANIFEST"
+            exit 1
+          fi
+
+          if ! grep -q "CA92.1" "$FLUTTER_MANIFEST"; then
+            echo "ERROR: Flutter.framework manifest missing reason CA92.1"
+            cat "$FLUTTER_MANIFEST"
+            exit 1
+          fi
+
+          echo "Checking NSUserDefaults privacy declaration in sqflite.framework manifest..."
+          if ! grep -q "NSPrivacyAccessedAPICategoryUserDefaults" "$SQFLITE_MANIFEST"; then
+            echo "ERROR: sqflite.framework manifest missing NSPrivacyAccessedAPICategoryUserDefaults"
+            cat "$SQFLITE_MANIFEST"
+            exit 1
+          fi
+
+          if ! grep -q "CA92.1" "$SQFLITE_MANIFEST"; then
+            echo "ERROR: sqflite.framework manifest missing reason CA92.1"
+            cat "$SQFLITE_MANIFEST"
             exit 1
           fi
 
