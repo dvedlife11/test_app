@@ -34,9 +34,18 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+  end
+
+  # Inject NSMicrophoneUsageDescription into every pod Info.plist to satisfy ITMS-90683
+  installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
-      # Inject NSMicrophoneUsageDescription into every pod Info.plist to satisfy ITMS-90683
-      config.build_settings['INFOPLIST_KEY_NSMicrophoneUsageDescription'] = 'This app uses the microphone so you can record your affirmation audio sessions.'
+      plist_path = "#{installer.sandbox.root}/#{target.name}/Info.plist"
+      next unless File.exist?(plist_path)
+      plist = File.read(plist_path)
+      unless plist.include?('NSMicrophoneUsageDescription')
+        plist.sub!('</dict>', "\t<key>NSMicrophoneUsageDescription</key>\n\t<string>This app uses the microphone so you can record your affirmation audio sessions.</string>\n</dict>")
+        File.write(plist_path, plist)
+      end
     end
   end
 end
