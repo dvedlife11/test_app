@@ -35,21 +35,30 @@ workflows:
       - name: Inject privacy manifest for Flutter.framework
         script: |
           cat > /tmp/PrivacyInfo.xcprivacy <<'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>NSPrivacyTracking</key>
-            <false/>
-            <key>NSPrivacyTrackingDomains</key>
-            <array/>
-            <key>NSPrivacyCollectedDataTypes</key>
-            <array/>
-            <key>NSPrivacyAccessedAPITypes</key>
-            <array/>
-          </dict>
-          </plist>
-          EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>NSPrivacyTracking</key>
+  <false/>
+  <key>NSPrivacyTrackingDomains</key>
+  <array/>
+  <key>NSPrivacyCollectedDataTypes</key>
+  <array/>
+  <key>NSPrivacyAccessedAPITypes</key>
+  <array>
+    <dict>
+      <key>NSPrivacyAccessedAPIType</key>
+      <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+      <key>NSPrivacyAccessedAPITypeReasons</key>
+      <array>
+        <string>CA92.1</string>
+      </array>
+    </dict>
+  </array>
+</dict>
+</plist>
+EOF
 
           COUNT=0
           while IFS= read -r FRAMEWORK_DIR; do
@@ -136,21 +145,30 @@ workflows:
           PLIST="$APP_PATH/Info.plist"
 
           cat > /tmp/PrivacyInfo.xcprivacy <<'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>NSPrivacyTracking</key>
-            <false/>
-            <key>NSPrivacyTrackingDomains</key>
-            <array/>
-            <key>NSPrivacyCollectedDataTypes</key>
-            <array/>
-            <key>NSPrivacyAccessedAPITypes</key>
-            <array/>
-          </dict>
-          </plist>
-          EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>NSPrivacyTracking</key>
+  <false/>
+  <key>NSPrivacyTrackingDomains</key>
+  <array/>
+  <key>NSPrivacyCollectedDataTypes</key>
+  <array/>
+  <key>NSPrivacyAccessedAPITypes</key>
+  <array>
+    <dict>
+      <key>NSPrivacyAccessedAPIType</key>
+      <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+      <key>NSPrivacyAccessedAPITypeReasons</key>
+      <array>
+        <string>CA92.1</string>
+      </array>
+    </dict>
+  </array>
+</dict>
+</plist>
+EOF
 
           cp /tmp/PrivacyInfo.xcprivacy "$APP_PATH/PrivacyInfo.xcprivacy"
 

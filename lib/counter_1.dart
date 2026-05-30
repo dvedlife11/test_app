@@ -181,13 +181,13 @@ class _Counter1ScreenState extends State<Counter1Screen> {
     final current = await repository.getCounterData(
       AppRepository.counter1Count,
     );
-    final newCount = current.lifetimeCount - 1;
+    final todayCount = current.last24hCount;
 
-    if (newCount < 0) return;
+    if (todayCount <= 0) return;
 
-    await repository.resetCounter(AppRepository.counter1Count);
+    await repository.resetCounterToday(AppRepository.counter1Count);
 
-    for (int i = 0; i < newCount; i++) {
+    for (int i = 0; i < todayCount - 1; i++) {
       await repository.addCounterTap(AppRepository.counter1Count);
     }
 

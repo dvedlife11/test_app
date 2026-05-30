@@ -192,13 +192,13 @@ class _Counter2ScreenState extends State<Counter2Screen> {
     final current = await repository.getCounterData(
       AppRepository.counter2Count,
     );
-    final newCount = current.lifetimeCount - 1;
+    final todayCount = current.last24hCount;
 
-    if (newCount < 0) return;
+    if (todayCount <= 0) return;
 
-    await repository.resetCounter(AppRepository.counter2Count);
+    await repository.resetCounterToday(AppRepository.counter2Count);
 
-    for (int i = 0; i < newCount; i++) {
+    for (int i = 0; i < todayCount - 1; i++) {
       await repository.addCounterTap(AppRepository.counter2Count);
     }
 
