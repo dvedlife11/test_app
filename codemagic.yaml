@@ -58,6 +58,12 @@ workflows:
 
           echo "Installed provisioning profile: $PROFILE_NAME ($PROFILE_UUID)"
           echo "Profile app identifier: $APP_IDENTIFIER"
+
+          EXPECTED_APP_IDENTIFIER="S2U8DTP342.com.thebone.test"
+          if [ "$APP_IDENTIFIER" != "$EXPECTED_APP_IDENTIFIER" ]; then
+            echo "Provisioning profile mismatch. Expected: $EXPECTED_APP_IDENTIFIER, got: $APP_IDENTIFIER"
+            exit 1
+          fi
       - name: Generate export options plist
         script: |
           cat > $HOME/export_options.plist <<EOF
