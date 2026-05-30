@@ -32,6 +32,36 @@ workflows:
         script: flutter pub get
       - name: Precache iOS artifacts
         script: flutter precache --ios
+      - name: Inject privacy manifest for Flutter.framework
+        script: |
+          cat > /tmp/PrivacyInfo.xcprivacy <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>NSPrivacyTracking</key>
+            <false/>
+            <key>NSPrivacyTrackingDomains</key>
+            <array/>
+            <key>NSPrivacyCollectedDataTypes</key>
+            <array/>
+            <key>NSPrivacyAccessedAPITypes</key>
+            <array/>
+          </dict>
+          </plist>
+          EOF
+
+          COUNT=0
+          while IFS= read -r FRAMEWORK_DIR; do
+            cp /tmp/PrivacyInfo.xcprivacy "$FRAMEWORK_DIR/PrivacyInfo.xcprivacy"
+            COUNT=$((COUNT + 1))
+            echo "Injected manifest into: $FRAMEWORK_DIR"
+          done < <(find "$FLUTTER_ROOT/bin/cache/artifacts/engine" -type d -name "Flutter.framework")
+
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No Flutter.framework directories found to patch"
+            exit 1
+          fi
       - name: Install CocoaPods
         script: |
           cd ios
