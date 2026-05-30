@@ -44,9 +44,20 @@ workflows:
           keychain add-certificates --certificate /tmp/certificate.p12 --certificate-password $P12_PASSWORD
       - name: Set up provisioning profile
         script: |
-          PROFILE_PATH="$HOME/Library/MobileDevice/Provisioning Profiles/profile.mobileprovision"
-          mkdir -p "$(dirname "$PROFILE_PATH")"
-          echo $BUILD_PROVISION_PROFILE_BASE64 | base64 --decode > "$PROFILE_PATH"
+          RAW_PROFILE_PATH="/tmp/profile.mobileprovision"
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          echo $BUILD_PROVISION_PROFILE_BASE64 | base64 --decode > "$RAW_PROFILE_PATH"
+
+          security cms -D -i "$RAW_PROFILE_PATH" > /tmp/profile.plist
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /tmp/profile.plist)
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /tmp/profile.plist)
+          APP_IDENTIFIER=$(/usr/libexec/PlistBuddy -c "Print Entitlements:application-identifier" /tmp/profile.plist)
+
+          PROFILE_PATH="$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+          cp "$RAW_PROFILE_PATH" "$PROFILE_PATH"
+
+          echo "Installed provisioning profile: $PROFILE_NAME ($PROFILE_UUID)"
+          echo "Profile app identifier: $APP_IDENTIFIER"
       - name: Generate export options plist
         script: |
           cat > $HOME/export_options.plist <<EOF
@@ -58,6 +69,13 @@ workflows:
             <string>app-store</string>
             <key>teamID</key>
             <string>S2U8DTP342</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.thebone.test</key>
+              <string>$PROFILE_NAME</string>
+            </dict>
             <key>uploadBitcode</key>
             <false/>
             <key>uploadSymbols</key>
