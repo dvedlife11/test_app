@@ -68,14 +68,33 @@ workflows:
 
           # Save profile name for use in next step
           echo "$PROFILE_NAME" > /tmp/profile_name.txt
-      - name: Set up code signing
-        script: xcode-project use-profiles
+      - name: Set up code signing and export options
+        script: |
+          xcode-project use-profiles
+          PROFILE_NAME=$(cat /tmp/profile_name.txt)
+          cat > /tmp/export_options.plist << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>teamID</key>
+            <string>S2U8DTP342</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.thebone.test</key>
+              <string>${PROFILE_NAME}</string>
+            </dict>
+          </dict>
+          </plist>
+          EOF
       - name: Build signed IPA
         script: |
-          flutter build ipa --release
-          echo "--- IPA search ---"
-          find . -name "*.ipa" 2>/dev/null
-          ls -la build/ios/ipa/ 2>/dev/null || echo "build/ios/ipa/ not found"
+          flutter build ipa --release \
+            --export-options-plist=/tmp/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
