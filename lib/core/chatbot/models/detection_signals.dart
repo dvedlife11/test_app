@@ -1,4 +1,3 @@
-
 /// Detection signals extracted from user behavior
 class DetectionSignals {
   // Execution signals
@@ -15,7 +14,8 @@ class DetectionSignals {
 
   // Catch signals
   final int catchCount;
-  final Map<String, int> catchTypeDistribution; // TRIGGER_3D, MENTAL_DIET, DWELLING
+  final Map<String, int>
+      catchTypeDistribution; // TRIGGER_3D, MENTAL_DIET, DWELLING
   final String? dominantCatchType;
 
   // System state
@@ -47,22 +47,22 @@ class DetectionSignals {
   });
 
   factory DetectionSignals.empty() => DetectionSignals(
-    counterManipulationSignal: false,
-    affirmationAvoidanceSignal: false,
-    lowConfidenceExecutionSignal: false,
-    triggerReactionSignal: false,
-    overfocusPattern: false,
-    neglectedCounterPattern: false,
-    catchCount: 0,
-    catchTypeDistribution: {},
-    dominantCatchType: null,
-    fragmentationPattern: false,
-    pressureAvoidancePattern: false,
-    recentAffirmationEdits: 0,
-    recentCatchActivity: false,
-    possibleCoachingVenting: false,
-    lowExecutionLevel: false,
-  );
+        counterManipulationSignal: false,
+        affirmationAvoidanceSignal: false,
+        lowConfidenceExecutionSignal: false,
+        triggerReactionSignal: false,
+        overfocusPattern: false,
+        neglectedCounterPattern: false,
+        catchCount: 0,
+        catchTypeDistribution: {},
+        dominantCatchType: null,
+        fragmentationPattern: false,
+        pressureAvoidancePattern: false,
+        recentAffirmationEdits: 0,
+        recentCatchActivity: false,
+        possibleCoachingVenting: false,
+        lowExecutionLevel: false,
+      );
 
   /// Check if HIGH_REACTIVITY override should trigger
   bool shouldTriggerHighReactivity() {

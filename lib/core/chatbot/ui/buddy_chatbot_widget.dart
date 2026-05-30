@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:test_app/core/chatbot/johnson_chatbot_engine.dart';
 import 'package:test_app/core/chatbot/models/chatbot_message.dart';
@@ -60,7 +59,7 @@ class _BuddyChatbotWidgetState extends State<BuddyChatbotWidget> {
 
     try {
       final response = await widget.engine.processMessage(message);
-      
+
       // Scroll to bottom
       Future.delayed(Duration(milliseconds: 100), () {
         _scrollController.animateTo(
@@ -81,7 +80,7 @@ class _BuddyChatbotWidgetState extends State<BuddyChatbotWidget> {
   void _triggerBoost() async {
     // Trigger boost without message input
     final response = await widget.engine.processMessage('[BOOST]');
-    
+
     if (response.boostMessage != null) {
       // Show boost message in dialog
       showDialog(
@@ -235,14 +234,14 @@ class _BuddyChatbotWidgetState extends State<BuddyChatbotWidget> {
 
   Widget _buildMessageBubble(ChatbotMessage message) {
     return Align(
-      alignment: message.isFromUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment:
+          message.isFromUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: message.isFromUser
-              ? Colors.blue.shade600
-              : Colors.grey.shade300,
+          color:
+              message.isFromUser ? Colors.blue.shade600 : Colors.grey.shade300,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(

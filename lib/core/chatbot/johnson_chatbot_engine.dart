@@ -1,4 +1,3 @@
-
 import 'package:test_app/core/chatbot/models/chatbot_state.dart';
 import 'package:test_app/core/chatbot/models/chatbot_response.dart';
 import 'package:test_app/core/chatbot/models/detection_signals.dart';
@@ -83,9 +82,11 @@ class JohnsonChatbotEngine {
     }
 
     // STEP 5: OUTPUT MODULATION
-    final groundTruth = MessageGenerator.generateGroundTruth(currentState, finalMode);
+    final groundTruth =
+        MessageGenerator.generateGroundTruth(currentState, finalMode);
     final movement = MessageGenerator.generateMovement(currentState);
-    final direction = MessageGenerator.generateDirection(currentState, finalMode, movement);
+    final direction =
+        MessageGenerator.generateDirection(currentState, finalMode, movement);
 
     // Determine boost message
     BoostMessageType? boostType;
@@ -97,11 +98,13 @@ class JohnsonChatbotEngine {
           ? BoostMessageType.deEscalate
           : BoostMessageType.simplify;
 
-      boostMessage = MessageGenerator.generateBoostMessage(boostType, currentState);
+      boostMessage =
+          MessageGenerator.generateBoostMessage(boostType, currentState);
     } else {
       // Normal boost based on state
       boostType = MessageGenerator.stateToBoostType(currentState.type);
-      boostMessage = MessageGenerator.generateBoostMessage(boostType, currentState);
+      boostMessage =
+          MessageGenerator.generateBoostMessage(boostType, currentState);
     }
 
     // STEP 6: FINAL VALIDATION

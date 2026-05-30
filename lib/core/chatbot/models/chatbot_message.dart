@@ -1,4 +1,3 @@
-
 /// Single message in chatbot conversation
 class ChatbotMessage {
   final String id;
@@ -20,27 +19,29 @@ class ChatbotMessage {
   factory ChatbotMessage.user({
     required String content,
     String? id,
-  }) => ChatbotMessage(
-    id: id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-    content: content,
-    isFromUser: true,
-    timestamp: DateTime.now(),
-    messageType: 'user_input',
-  );
+  }) =>
+      ChatbotMessage(
+        id: id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        content: content,
+        isFromUser: true,
+        timestamp: DateTime.now(),
+        messageType: 'user_input',
+      );
 
   factory ChatbotMessage.system({
     required String content,
     String? messageType,
     Map<String, dynamic>? metadata,
     String? id,
-  }) => ChatbotMessage(
-    id: id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-    content: content,
-    isFromUser: false,
-    timestamp: DateTime.now(),
-    messageType: messageType,
-    metadata: metadata,
-  );
+  }) =>
+      ChatbotMessage(
+        id: id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        content: content,
+        isFromUser: false,
+        timestamp: DateTime.now(),
+        messageType: messageType,
+        metadata: metadata,
+      );
 }
 
 /// Conversation history tracker
@@ -58,11 +59,11 @@ class ChatbotConversation {
   });
 
   factory ChatbotConversation.empty() => ChatbotConversation(
-    messages: [],
-    createdAt: DateTime.now(),
-    lastMessageAt: DateTime.now(),
-    messageCount: 0,
-  );
+        messages: [],
+        createdAt: DateTime.now(),
+        lastMessageAt: DateTime.now(),
+        messageCount: 0,
+      );
 
   ChatbotConversation addMessage(ChatbotMessage message) {
     return ChatbotConversation(
@@ -99,19 +100,20 @@ class BoostUsageMetrics {
   });
 
   factory BoostUsageMetrics.empty() => BoostUsageMetrics(
-    totalBoostsUsed: 0,
-    boostTimestamps: [],
-    boostTypeUsage: {},
-    lastBoostAt: null,
-    boostsToday: 0,
-    showingBoostDependency: false,
-  );
+        totalBoostsUsed: 0,
+        boostTimestamps: [],
+        boostTypeUsage: {},
+        lastBoostAt: null,
+        boostsToday: 0,
+        showingBoostDependency: false,
+      );
 
   /// Update with new boost usage
   BoostUsageMetrics recordBoost(String boostType) {
     final now = DateTime.now();
     final todayBoosts = boostTimestamps
-        .where((t) => t.day == now.day && t.month == now.month && t.year == now.year)
+        .where((t) =>
+            t.day == now.day && t.month == now.month && t.year == now.year)
         .length;
 
     final newUsage = Map<String, int>.from(boostTypeUsage);

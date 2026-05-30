@@ -1,4 +1,3 @@
-
 import 'package:test_app/core/chatbot/models/detection_signals.dart';
 import 'package:test_app/core/models/behavior_patterns.dart';
 import 'package:test_app/core/models/daily_event_record.dart';
@@ -60,9 +59,7 @@ class BehavioralDetector {
 
   /// Counter reset clusters indicate manipulation
   static bool _detectCounterManipulation(List<DailyEventRecord> events) {
-    final resets = events
-        .where((e) => e.eventType == 'counter_reset')
-        .length;
+    final resets = events.where((e) => e.eventType == 'counter_reset').length;
 
     return resets > 2; // threshold: more than 2 resets in recent period
   }
@@ -76,7 +73,9 @@ class BehavioralDetector {
   /// Low execution score despite edits
   static bool _detectLowConfidenceExecution(List<DailyEventRecord> events) {
     final completedActions = events
-        .where((e) => e.eventType == 'affirmation_completed' || e.eventType == 'counter_increment')
+        .where((e) =>
+            e.eventType == 'affirmation_completed' ||
+            e.eventType == 'counter_increment')
         .length;
 
     return completedActions == 0;
@@ -84,8 +83,9 @@ class BehavioralDetector {
 
   /// Rapid modification after trigger event
   static bool _detectTriggerReaction(List<DailyEventRecord> events) {
-    final triggerEvents = events.where((e) => e.eventType == 'trigger_detected');
-    
+    final triggerEvents =
+        events.where((e) => e.eventType == 'trigger_detected');
+
     for (var trigger in triggerEvents) {
       final nextHourEvents = events
           .where((e) =>
@@ -118,13 +118,12 @@ class BehavioralDetector {
 
   /// Count catches from events
   static int _countCatches(List<DailyEventRecord> events) {
-    return events
-        .where((e) => e.eventType == 'catch_recorded')
-        .length;
+    return events.where((e) => e.eventType == 'catch_recorded').length;
   }
 
   /// Classify catches by type
-  static Map<String, int> _getCatchTypeDistribution(List<DailyEventRecord> events) {
+  static Map<String, int> _getCatchTypeDistribution(
+      List<DailyEventRecord> events) {
     final distribution = <String, int>{};
 
     for (var event in events) {
@@ -152,22 +151,29 @@ class BehavioralDetector {
   }
 
   /// High instability + no umbrella active
-  static bool _detectFragmentation(DailyCompiledState state, BehaviorPatterns patterns) {
+  static bool _detectFragmentation(
+      DailyCompiledState state, BehaviorPatterns patterns) {
     final instabilityScore = (patterns.instabilityScore ?? 0.0);
-    final umbrellaActive = state.systemState?['umbrellaActive'] as bool? ?? false;
+    final umbrellaActive =
+        state.systemState?['umbrellaActive'] as bool? ?? false;
 
     return instabilityScore > 60.0 && !umbrellaActive;
   }
 
   /// Multiple systems disabled
   static bool _detectPressureAvoidance(DailyCompiledState state) {
-    final dailyTargetEnabled = state.systemState?['dailyTargetEnabled'] as bool? ?? true;
-    final countersActive = state.systemState?['countersActive'] as bool? ?? true;
-    final umbrellaActive = state.systemState?['umbrellaActive'] as bool? ?? true;
+    final dailyTargetEnabled =
+        state.systemState?['dailyTargetEnabled'] as bool? ?? true;
+    final countersActive =
+        state.systemState?['countersActive'] as bool? ?? true;
+    final umbrellaActive =
+        state.systemState?['umbrellaActive'] as bool? ?? true;
 
-    final disabledCount = [!dailyTargetEnabled, !countersActive, !umbrellaActive]
-        .where((d) => d)
-        .length;
+    final disabledCount = [
+      !dailyTargetEnabled,
+      !countersActive,
+      !umbrellaActive
+    ].where((d) => d).length;
 
     return disabledCount >= 2;
   }
@@ -181,7 +187,8 @@ class BehavioralDetector {
   static bool _detectCoachingVenting(List<DailyEventRecord> events) {
     final coachingEvents = events
         .where((e) => e.eventType == 'coaching_interaction')
-        .where((e) => (e.metadata?['inputLength'] as int? ?? 0) > 200) // long text
+        .where(
+            (e) => (e.metadata?['inputLength'] as int? ?? 0) > 200) // long text
         .length;
 
     return coachingEvents > 0;

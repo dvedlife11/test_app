@@ -1,4 +1,3 @@
-
 import 'package:test_app/core/chatbot/models/chatbot_response.dart';
 import 'package:test_app/core/chatbot/models/detection_signals.dart';
 import 'package:test_app/core/chatbot/models/chatbot_state.dart';
@@ -10,7 +9,8 @@ class OverrideSystem {
     required OverrideState override,
     required ChatbotState state,
     required DetectionSignals signals,
-    required Function(ResponseMode, PressureLevel, BoostMessageType?, String?) onOverride,
+    required Function(ResponseMode, PressureLevel, BoostMessageType?, String?)
+        onOverride,
   }) {
     switch (override) {
       case OverrideState.highReactivity:
@@ -31,7 +31,8 @@ class OverrideSystem {
   static void _applyHighReactivityOverride(
     ChatbotState state,
     DetectionSignals signals,
-    Function(ResponseMode, PressureLevel, BoostMessageType?, String?) onOverride,
+    Function(ResponseMode, PressureLevel, BoostMessageType?, String?)
+        onOverride,
   ) {
     // Mode: stabilize (lock behavior, reduce chaos)
     final mode = ResponseMode.stabilize;
@@ -61,7 +62,8 @@ class OverrideSystem {
   static void _applyOutOfScopeOverride(
     ChatbotState state,
     DetectionSignals signals,
-    Function(ResponseMode, PressureLevel, BoostMessageType?, String?) onOverride,
+    Function(ResponseMode, PressureLevel, BoostMessageType?, String?)
+        onOverride,
   ) {
     // Mode: push (force back to basics)
     final mode = ResponseMode.push;
@@ -87,7 +89,8 @@ class OverrideSystem {
   }
 
   /// Get override-specific pressure level
-  static PressureLevel getPressureForOverride(OverrideState override, {required double executionScore}) {
+  static PressureLevel getPressureForOverride(OverrideState override,
+      {required double executionScore}) {
     switch (override) {
       case OverrideState.highReactivity:
         return PressureLevel.medium; // de-escalate
@@ -103,7 +106,8 @@ class OverrideSystem {
     switch (override) {
       case OverrideState.highReactivity:
         // Block: analysis, advice, long input
-        return ['analysis', 'coaching', 'detailed_advice'].contains(featureName);
+        return ['analysis', 'coaching', 'detailed_advice']
+            .contains(featureName);
 
       case OverrideState.outOfScope:
         // Block: emotional dumps, multiple options

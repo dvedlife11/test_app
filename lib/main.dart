@@ -1,6 +1,20 @@
 import 'package:flutter/material.dart';
+import 'audio_handler.dart';
+import 'app_lock_gate.dart';
+import 'library.dart';
+import 'dashboard.dart';
+import 'home_final.dart';
+import 'setup.dart';
+import 'counter_1.dart';
+import 'counter_2.dart';
+import 'counter_3.dart';
+import 'counter_umbrella.dart';
+import 'design_system.dart';
+import 'core/chatbot/ui/buddy_chat_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initAudioHandler();
   runApp(const MyApp());
 }
 
@@ -11,20 +25,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      theme: appTheme,
+      home: const AppLockGate(child: HomeFinalScreen()),
+      routes: {
+        '/home_final': (context) => const HomeFinalScreen(),
+        '/library': (context) => const LibraryScreen(),
+        '/dashboard': (context) => const DashboardScreen(),
+        '/setup': (context) => const SetupScreen(),
+        '/counter_1': (context) => const Counter1Screen(),
+        '/counter_2': (context) => const Counter2Screen(),
+        '/counter_3': (context) => const Counter3Screen(),
+        '/counter_umbrella': (context) => const CounterUmbrellaScreen(),
+        '/buddy-chat': (context) => const BuddyChatPage(),
+      },
     );
   }
 }

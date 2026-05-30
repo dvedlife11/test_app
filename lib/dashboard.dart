@@ -63,171 +63,174 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onHorizontalDragUpdate: _handleHorizontalDragUpdate,
         onHorizontalDragEnd: _handleHorizontalSwipe,
         child: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/bg1.jpg'),
-            fit: BoxFit.cover,
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/bg1.jpg'),
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(24),
-                  children: [
-                    const _TopHeaderWithMenu(),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Align(
-                        alignment: const Alignment(0.08, 0),
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 300),
-                          child: const CalendarBlock(),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.all(24),
+                    children: [
+                      const _TopHeaderWithMenu(),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Align(
+                          alignment: const Alignment(0.08, 0),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 300),
+                            child: const CalendarBlock(),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 40),
-                    FutureBuilder<List<Object?>>(
-                      future: Future.wait([
-                        repository.getAffirmationText('affirmation_1'),
-                        repository.getCounterData(AppRepository.counter1Count),
-                        getTargetValueForCounter(AppRepository.counter1Count),
-                        repository.getCounterEnabled(
-                          AppRepository.counter1Count,
-                        ),
-                      ]),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return const SizedBox.shrink();
-                        final label = snapshot.data![0] as String;
-                        final data = snapshot.data![1] as CounterData?;
-                        final target = snapshot.data![2] as int? ?? 0;
-                        final enabled = snapshot.data![3] as bool;
-                        if (!enabled) {
-                          return _DisabledAffirmationRow(
-                            label: label.isNotEmpty ? label : 'Affirmation 1',
-                          );
-                        }
-                        return _AffirmationProgressRow(
-                          label: label.isNotEmpty ? label : 'Affirmation 1',
-                          current: data?.last24hCount ?? 0,
-                          target: target,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    FutureBuilder<List<Object?>>(
-                      future: Future.wait([
-                        repository.getAffirmationText('affirmation_2'),
-                        repository.getCounterData(AppRepository.counter2Count),
-                        getTargetValueForCounter(AppRepository.counter2Count),
-                        repository.getCounterEnabled(
-                          AppRepository.counter2Count,
-                        ),
-                      ]),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return const SizedBox.shrink();
-                        final label = snapshot.data![0] as String;
-                        final data = snapshot.data![1] as CounterData?;
-                        final target = snapshot.data![2] as int? ?? 0;
-                        final enabled = snapshot.data![3] as bool;
-                        if (!enabled) {
-                          return _DisabledAffirmationRow(
-                            label: label.isNotEmpty ? label : 'Affirmation 2',
-                          );
-                        }
-                        return _AffirmationProgressRow(
-                          label: label.isNotEmpty ? label : 'Affirmation 2',
-                          current: data?.last24hCount ?? 0,
-                          target: target,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    FutureBuilder<List<Object?>>(
-                      future: Future.wait([
-                        repository.getAffirmationText('affirmation_3'),
-                        repository.getCounterData(AppRepository.counter3Count),
-                        getTargetValueForCounter(AppRepository.counter3Count),
-                        repository.getCounterEnabled(
-                          AppRepository.counter3Count,
-                        ),
-                      ]),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return const SizedBox.shrink();
-                        final label = snapshot.data![0] as String;
-                        final data = snapshot.data![1] as CounterData?;
-                        final target = snapshot.data![2] as int? ?? 0;
-                        final enabled = snapshot.data![3] as bool;
-                        if (!enabled) {
-                          return _DisabledAffirmationRow(
-                            label: label.isNotEmpty ? label : 'Affirmation 3',
-                          );
-                        }
-                        return _AffirmationProgressRow(
-                          label: label.isNotEmpty ? label : 'Affirmation 3',
-                          current: data?.last24hCount ?? 0,
-                          target: target,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    StreamBuilder<String>(
-                      stream: repository.watchSelectedUmbrella(),
-                      builder: (context, umbrellaSnap) {
-                        if (!umbrellaSnap.hasData)
-                          return const SizedBox.shrink();
-                        final umbrellaKey = umbrellaSnap.data!;
-                        final umbrellaText = umbrellaTexts[umbrellaKey] ??
-                            _friendlyUmbrellaLabel(umbrellaKey);
-
-                        return FutureBuilder<List<Object?>>(
-                          future: Future.wait([
-                            repository.getCounterData(
-                              AppRepository.umbrellaCount,
-                              affirmationKeyOverride: repository
-                                  .mapUmbrellaToAffirmation(umbrellaKey),
-                            ),
-                            getTargetValueForCounter(
-                              AppRepository.umbrellaCount,
-                            ),
-                            repository.getCounterEnabled(
-                              AppRepository.umbrellaCount,
-                            ),
-                          ]),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData)
-                              return const SizedBox.shrink();
-                            final data = snapshot.data![0] as CounterData?;
-                            final target = snapshot.data![1] as int? ?? 0;
-                            final enabled = snapshot.data![2] as bool;
-                            if (!enabled) {
-                              return _DisabledAffirmationRow(
-                                label: umbrellaText,
-                              );
-                            }
-                            return _AffirmationProgressRow(
-                              label: umbrellaText,
-                              current: data?.last24hCount ?? 0,
-                              target: target,
+                      const SizedBox(height: 40),
+                      FutureBuilder<List<Object?>>(
+                        future: Future.wait([
+                          repository.getAffirmationText('affirmation_1'),
+                          repository
+                              .getCounterData(AppRepository.counter1Count),
+                          getTargetValueForCounter(AppRepository.counter1Count),
+                          repository.getCounterEnabled(
+                            AppRepository.counter1Count,
+                          ),
+                        ]),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) return const SizedBox.shrink();
+                          final label = snapshot.data![0] as String;
+                          final data = snapshot.data![1] as CounterData?;
+                          final target = snapshot.data![2] as int? ?? 0;
+                          final enabled = snapshot.data![3] as bool;
+                          if (!enabled) {
+                            return _DisabledAffirmationRow(
+                              label: label.isNotEmpty ? label : 'Affirmation 1',
                             );
-                          },
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 40),
-                    const NavigationBottomGrid(),
-                    const SizedBox(height: 24),
-                  ],
+                          }
+                          return _AffirmationProgressRow(
+                            label: label.isNotEmpty ? label : 'Affirmation 1',
+                            current: data?.last24hCount ?? 0,
+                            target: target,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      FutureBuilder<List<Object?>>(
+                        future: Future.wait([
+                          repository.getAffirmationText('affirmation_2'),
+                          repository
+                              .getCounterData(AppRepository.counter2Count),
+                          getTargetValueForCounter(AppRepository.counter2Count),
+                          repository.getCounterEnabled(
+                            AppRepository.counter2Count,
+                          ),
+                        ]),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) return const SizedBox.shrink();
+                          final label = snapshot.data![0] as String;
+                          final data = snapshot.data![1] as CounterData?;
+                          final target = snapshot.data![2] as int? ?? 0;
+                          final enabled = snapshot.data![3] as bool;
+                          if (!enabled) {
+                            return _DisabledAffirmationRow(
+                              label: label.isNotEmpty ? label : 'Affirmation 2',
+                            );
+                          }
+                          return _AffirmationProgressRow(
+                            label: label.isNotEmpty ? label : 'Affirmation 2',
+                            current: data?.last24hCount ?? 0,
+                            target: target,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      FutureBuilder<List<Object?>>(
+                        future: Future.wait([
+                          repository.getAffirmationText('affirmation_3'),
+                          repository
+                              .getCounterData(AppRepository.counter3Count),
+                          getTargetValueForCounter(AppRepository.counter3Count),
+                          repository.getCounterEnabled(
+                            AppRepository.counter3Count,
+                          ),
+                        ]),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) return const SizedBox.shrink();
+                          final label = snapshot.data![0] as String;
+                          final data = snapshot.data![1] as CounterData?;
+                          final target = snapshot.data![2] as int? ?? 0;
+                          final enabled = snapshot.data![3] as bool;
+                          if (!enabled) {
+                            return _DisabledAffirmationRow(
+                              label: label.isNotEmpty ? label : 'Affirmation 3',
+                            );
+                          }
+                          return _AffirmationProgressRow(
+                            label: label.isNotEmpty ? label : 'Affirmation 3',
+                            current: data?.last24hCount ?? 0,
+                            target: target,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      StreamBuilder<String>(
+                        stream: repository.watchSelectedUmbrella(),
+                        builder: (context, umbrellaSnap) {
+                          if (!umbrellaSnap.hasData)
+                            return const SizedBox.shrink();
+                          final umbrellaKey = umbrellaSnap.data!;
+                          final umbrellaText = umbrellaTexts[umbrellaKey] ??
+                              _friendlyUmbrellaLabel(umbrellaKey);
+
+                          return FutureBuilder<List<Object?>>(
+                            future: Future.wait([
+                              repository.getCounterData(
+                                AppRepository.umbrellaCount,
+                                affirmationKeyOverride: repository
+                                    .mapUmbrellaToAffirmation(umbrellaKey),
+                              ),
+                              getTargetValueForCounter(
+                                AppRepository.umbrellaCount,
+                              ),
+                              repository.getCounterEnabled(
+                                AppRepository.umbrellaCount,
+                              ),
+                            ]),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData)
+                                return const SizedBox.shrink();
+                              final data = snapshot.data![0] as CounterData?;
+                              final target = snapshot.data![1] as int? ?? 0;
+                              final enabled = snapshot.data![2] as bool;
+                              if (!enabled) {
+                                return _DisabledAffirmationRow(
+                                  label: umbrellaText,
+                                );
+                              }
+                              return _AffirmationProgressRow(
+                                label: umbrellaText,
+                                current: data?.last24hCount ?? 0,
+                                target: target,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 40),
+                      const NavigationBottomGrid(),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
   }
 }
 

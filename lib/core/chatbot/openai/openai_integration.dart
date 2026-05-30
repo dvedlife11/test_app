@@ -1,6 +1,6 @@
-
 import 'package:test_app/core/chatbot/models/chatbot_message.dart';
 import 'package:test_app/core/chatbot/models/chatbot_response.dart';
+import 'package:test_app/core/chatbot/models/chatbot_state.dart';
 
 /// OpenAI integration for conversational AI
 /// TODO: Add actual OpenAI API calls when credentials available
@@ -63,7 +63,8 @@ Rules:
   }
 
   /// Build context from recent messages
-  List<Map<String, String>> _buildContextMessages(List<ChatbotMessage> messages) {
+  List<Map<String, String>> _buildContextMessages(
+      List<ChatbotMessage> messages) {
     return messages.take(10).map((msg) {
       return {
         "role": msg.isFromUser ? "user" : "assistant",
@@ -165,19 +166,3 @@ Rules:
     return {"error": "OpenAI integration not yet implemented"};
   }
 }
-
-// Imported types (stubs for compilation)
-class ChatbotState {
-  final double executionScore;
-  final double instabilityScore;
-  final double disciplineScore;
-
-  ChatbotState({
-    required this.executionScore,
-    required this.instabilityScore,
-    required this.disciplineScore,
-  });
-}
-
-enum ResponseMode { push, stabilize, callOut }
-enum PressureLevel { low, medium, high }

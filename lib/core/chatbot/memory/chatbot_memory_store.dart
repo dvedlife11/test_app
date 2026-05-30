@@ -1,4 +1,3 @@
-
 import 'package:test_app/core/chatbot/models/chatbot_response_memory.dart';
 import 'package:test_app/core/chatbot/models/chatbot_message.dart';
 import 'package:test_app/core/models/crm_card.dart';
@@ -17,10 +16,10 @@ class ChatbotMemoryStore {
   });
 
   factory ChatbotMemoryStore.initialize() => ChatbotMemoryStore(
-    conversationHistory: [],
-    responseMemory: ChatbotResponseMemory.initialize(),
-    sessionStart: DateTime.now(),
-  );
+        conversationHistory: [],
+        responseMemory: ChatbotResponseMemory.initialize(),
+        sessionStart: DateTime.now(),
+      );
 
   /// Save conversation message to persistent storage
   Future<void> saveMessage(ChatbotMessage message) async {
