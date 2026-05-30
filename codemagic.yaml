@@ -126,6 +126,39 @@ workflows:
           flutter build ipa --release \
             --build-number=$PROJECT_BUILD_NUMBER \
             --export-options-plist=/tmp/export_options.plist
+      - name: Verify NSMicrophoneUsageDescription in final IPA
+        script: |
+          IPA_PATH=$(find build/ios/ipa -name "*.ipa" | head -1)
+          if [ -z "$IPA_PATH" ]; then
+            echo "ERROR: No IPA file found"
+            exit 1
+          fi
+
+          echo "IPA Path: $IPA_PATH"
+          
+          # Extract Info.plist from IPA
+          TEMP_DIR=$(mktemp -d)
+          unzip -q "$IPA_PATH" -d "$TEMP_DIR"
+          INFO_PLIST="$TEMP_DIR/Payload/Runner.app/Info.plist"
+          
+          if [ ! -f "$INFO_PLIST" ]; then
+            echo "ERROR: Info.plist not found in IPA"
+            exit 1
+          fi
+          
+          echo "Info.plist content:"
+          cat "$INFO_PLIST" | grep -A 1 "NSMicrophoneUsageDescription" || echo "WARNING: NSMicrophoneUsageDescription NOT FOUND"
+          
+          # Check if the key exists
+          if ! grep -q "NSMicrophoneUsageDescription" "$INFO_PLIST"; then
+            echo "ERROR: NSMicrophoneUsageDescription missing from IPA Info.plist"
+            echo "Full Info.plist:"
+            cat "$INFO_PLIST"
+            exit 1
+          fi
+          
+          echo "✓ NSMicrophoneUsageDescription verified in final IPA"
+          rm -rf "$TEMP_DIR"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
