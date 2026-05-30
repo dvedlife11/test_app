@@ -325,9 +325,7 @@ class _SetupScreenState extends State<SetupScreen> {
     }
 
     try {
-      final resultsRaw = await rootBundle.loadString(
-        'assets/data/onboarding_results.csv',
-      );
+      final resultsRaw = await _loadOnboardingResultsCsv();
       final rowsTable = _parseCsvTable(resultsRaw);
       if (rowsTable.length >= 2) {
         final header =
@@ -335,7 +333,9 @@ class _SetupScreenState extends State<SetupScreen> {
         int indexOf(String name) => header.indexOf(name);
 
         final scoreCol = indexOf('yes_count_score');
-        final titleCol = indexOf('title');
+        final titleCol = indexOf('title') >= 0
+            ? indexOf('title')
+            : indexOf('impact_category');
         final descriptionCol = indexOf('description');
 
         if (scoreCol >= 0 && titleCol >= 0 && descriptionCol >= 0) {
@@ -374,6 +374,12 @@ class _SetupScreenState extends State<SetupScreen> {
       _resultByScore = loadedResults;
       _inlineQuestionsLoaded = true;
     });
+  }
+
+  Future<String> _loadOnboardingResultsCsv() async {
+    return await rootBundle.loadString(
+      'assets/data/onboarding_asnwer_test.csv',
+    );
   }
 
   SetupQuizResultProfile _resultFromYesCount(int count) {
@@ -512,155 +518,159 @@ class _SetupScreenState extends State<SetupScreen> {
           ),
           child: SafeArea(
             child: FutureBuilder<OnboardingResultData?>(
-            future: _onboardingResultFuture,
-            builder: (context, snapshot) {
-              final result = snapshot.data;
-              final hasCompletedQuiz = result != null;
-              _scheduleScrollToRequestedSection(hasCompletedQuiz);
+              future: _onboardingResultFuture,
+              builder: (context, snapshot) {
+                final result = snapshot.data;
+                final hasCompletedQuiz = result != null;
+                _scheduleScrollToRequestedSection(hasCompletedQuiz);
 
-              return Scrollbar(
-                controller: _scrollController,
-                thumbVisibility: true,
-                child: ListView(
+                return Scrollbar(
                   controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 22,
-                    vertical: 18,
-                  ),
-                  children: [
-                    const SizedBox(height: AppSpacing.s24),
-                    const AppHeader(
-                      title: 'Setup',
-                      subtitle: 'Make Your Choices',
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                  thumbVisibility: true,
+                  child: ListView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 22,
+                      vertical: 18,
                     ),
-                    const SizedBox(height: AppSpacing.sectionGap),
-                    Container(
-                      key: _impactProfileKey,
-                      child: const AppSectionLabel(title: 'Your Impact'),
-                    ),
-                    const SizedBox(height: AppSpacing.sectionTitleToContent),
-                    SizedBox(
-                      width: double.infinity,
-                      child: _ImpactCard(result: result),
-                    ),
-                    const SizedBox(height: AppSpacing.sectionGap),
-                    Container(
-                      key: _onboardingQuizKey,
-                      child: const AppSectionLabel(title: 'Onboarding'),
-                    ),
-                    const SizedBox(height: AppSpacing.sectionTitleToContent),
-                    if (!_showInlineOnboardingQuiz)
-                      _OnboardingCard(
-                        hasCompletedQuiz: hasCompletedQuiz,
-                        onStartQuiz: _startInlineQuiz,
+                    children: [
+                      const SizedBox(height: AppSpacing.s24),
+                      const AppHeader(
+                        title: 'Setup',
+                        subtitle: 'Make Your Choices',
+                        crossAxisAlignment: CrossAxisAlignment.center,
                       ),
-                    if (_showInlineOnboardingQuiz) ...[
-                      OnboardingQuizWidget(
-                        onCompleted: _handleInlineQuizCompleted,
-                      ),
-                    ],
-                    if (hasCompletedQuiz) ...[
                       const SizedBox(height: AppSpacing.sectionGap),
-                      const AppSectionLabel(title: 'Set up your affirmations'),
+                      Container(
+                        key: _impactProfileKey,
+                        child: const AppSectionLabel(title: 'Your Impact'),
+                      ),
                       const SizedBox(height: AppSpacing.sectionTitleToContent),
-                      AppCardSurface(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(999),
-                                onTap: () {
-                                  showAppBottomPopupDialog<void>(
-                                    context: context,
-                                    title: 'About Affirmations',
-                                    content: const Text(
-                                      'First, complete your onboarding quiz to create your impact profile, which shows where you currently stand on your mental diet. After that, personalize your affirmations and their corresponding counter-targets.',
-                                      style: AppTextStyles.body,
-                                    ),
-                                    actions: const [
-                                      AppBottomPopupAction<void>(
-                                        label: 'Close',
+                      SizedBox(
+                        width: double.infinity,
+                        child: _ImpactCard(result: result),
+                      ),
+                      const SizedBox(height: AppSpacing.sectionGap),
+                      Container(
+                        key: _onboardingQuizKey,
+                        child: const AppSectionLabel(title: 'Onboarding'),
+                      ),
+                      const SizedBox(height: AppSpacing.sectionTitleToContent),
+                      if (!_showInlineOnboardingQuiz)
+                        _OnboardingCard(
+                          hasCompletedQuiz: hasCompletedQuiz,
+                          onStartQuiz: _startInlineQuiz,
+                        ),
+                      if (_showInlineOnboardingQuiz) ...[
+                        OnboardingQuizWidget(
+                          onCompleted: _handleInlineQuizCompleted,
+                        ),
+                      ],
+                      if (hasCompletedQuiz) ...[
+                        const SizedBox(height: AppSpacing.sectionGap),
+                        const AppSectionLabel(
+                            title: 'Set up your affirmations'),
+                        const SizedBox(
+                            height: AppSpacing.sectionTitleToContent),
+                        AppCardSurface(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(999),
+                                  onTap: () {
+                                    showAppBottomPopupDialog<void>(
+                                      context: context,
+                                      title: 'About Affirmations',
+                                      content: const Text(
+                                        'First, complete your onboarding quiz to create your impact profile, which shows where you currently stand on your mental diet. After that, personalize your affirmations and their corresponding counter-targets.',
+                                        style: AppTextStyles.body,
                                       ),
-                                    ],
-                                  );
-                                },
-                                child: const Padding(
-                                  padding: EdgeInsets.all(4),
-                                  child: Icon(
-                                    Icons.lightbulb_outline_rounded,
-                                    size: 18,
-                                    color: Colors.white70,
+                                      actions: const [
+                                        AppBottomPopupAction<void>(
+                                          label: 'Close',
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(4),
+                                    child: Icon(
+                                      Icons.lightbulb_outline_rounded,
+                                      size: 18,
+                                      color: Colors.white70,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            LayoutBuilder(
-                              builder: (context, constraints) {
-                                const spacing = 8.0;
-                                final itemWidth =
-                                    (constraints.maxWidth - spacing) / 2;
-                                return Wrap(
-                                  spacing: spacing,
-                                  runSpacing: spacing,
-                                  children: List.generate(4, (index) {
-                                    const labels = [
-                                      'Affirmation 1',
-                                      'Affirmation 2',
-                                      'Affirmation 3',
-                                      'Umbrella',
-                                    ];
+                              const SizedBox(height: 8),
+                              LayoutBuilder(
+                                builder: (context, constraints) {
+                                  const spacing = 8.0;
+                                  final itemWidth =
+                                      (constraints.maxWidth - spacing) / 2;
+                                  return Wrap(
+                                    spacing: spacing,
+                                    runSpacing: spacing,
+                                    children: List.generate(4, (index) {
+                                      const labels = [
+                                        'Affirmation 1',
+                                        'Affirmation 2',
+                                        'Affirmation 3',
+                                        'Umbrella',
+                                      ];
 
-                                    return SizedBox(
-                                      width: itemWidth,
-                                      child: AppSelectionButton(
-                                        label: labels[index],
-                                        selected:
-                                            _selectedAffirmationOption == index,
-                                        onTap: () {
-                                          setState(() {
-                                            _selectedAffirmationOption = index;
-                                          });
-                                        },
-                                      ),
-                                    );
-                                  }),
-                                );
-                              },
-                            ),
-                          ],
+                                      return SizedBox(
+                                        width: itemWidth,
+                                        child: AppSelectionButton(
+                                          label: labels[index],
+                                          selected:
+                                              _selectedAffirmationOption ==
+                                                  index,
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedAffirmationOption =
+                                                  index;
+                                            });
+                                          },
+                                        ),
+                                      );
+                                    }),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(height: 16),
+                        SizedBox(key: _setupAffirmationsKey),
+                        _buildSelectedAffirmationWidget(),
+                      ],
+                      const SizedBox(height: AppSpacing.sectionGap),
+                      SizedBox(
+                        key: _audioSessionKey,
+                        child: const AppSectionLabel(title: 'Audio Session'),
                       ),
-                      const SizedBox(height: 16),
-                      SizedBox(key: _setupAffirmationsKey),
-                      _buildSelectedAffirmationWidget(),
+                      const SizedBox(height: AppSpacing.sectionTitleToContent),
+                      const AudioSessionBuilderWidget(),
+                      const SizedBox(height: AppSpacing.sectionGap),
+                      const AppSectionLabel(title: 'Notifications'),
+                      const SizedBox(height: AppSpacing.sectionTitleToContent),
+                      _NotificationsCard(repository: _repository),
+                      const SizedBox(height: AppSpacing.sectionGap),
+                      const NavigationBottomGrid(),
+                      const SizedBox(height: AppSpacing.sectionGap),
                     ],
-                    const SizedBox(height: AppSpacing.sectionGap),
-                    SizedBox(
-                      key: _audioSessionKey,
-                      child: const AppSectionLabel(title: 'Audio Session'),
-                    ),
-                    const SizedBox(height: AppSpacing.sectionTitleToContent),
-                    const AudioSessionBuilderWidget(),
-                    const SizedBox(height: AppSpacing.sectionGap),
-                    const AppSectionLabel(title: 'Notifications'),
-                    const SizedBox(height: AppSpacing.sectionTitleToContent),
-                    _NotificationsCard(repository: _repository),
-                    const SizedBox(height: AppSpacing.sectionGap),
-                    const NavigationBottomGrid(),
-                    const SizedBox(height: AppSpacing.sectionGap),
-                  ],
-                ),
-              );
-            },
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
   }
 }
 
