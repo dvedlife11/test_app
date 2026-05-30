@@ -1,5 +1,5 @@
-# Define the minimum iOS deployment target required by plugins.
-platform :ios, '12.0'
+source 'https://github.com/CocoaPods/Specs.git'
+platform :ios, '13.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -28,24 +28,19 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
-  end
 
-  # Inject NSMicrophoneUsageDescription into every pod Info.plist to satisfy ITMS-90683
-  installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
-      plist_path = "#{installer.sandbox.root}/#{target.name}/Info.plist"
-      next unless File.exist?(plist_path)
-      plist = File.read(plist_path)
-      unless plist.include?('NSMicrophoneUsageDescription')
-        plist.sub!('</dict>', "\t<key>NSMicrophoneUsageDescription</key>\n\t<string>This app uses the microphone so you can record your affirmation audio sessions.</string>\n</dict>")
-        File.write(plist_path, plist)
-      end
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      config.build_settings['INFOPLIST_KEY_NSMicrophoneUsageDescription'] = 'This app uses the microphone so you can record your affirmation audio sessions.'
     end
   end
 end
