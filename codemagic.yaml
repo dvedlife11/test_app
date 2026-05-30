@@ -12,7 +12,7 @@ workflows:
         XCODE_SCHEME: Runner
         BUNDLE_ID: com.thebone.test
       groups:
-        - app_store_connect
+        - app_store
     triggering:
       events:
         - push
