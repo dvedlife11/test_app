@@ -44,32 +44,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _horizontalDragDistance += details.delta.dx;
   }
 
-  Future<void> _handleHorizontalSwipe(DragEndDetails details) async {
+  void _handleHorizontalSwipe(DragEndDetails details) {
     final distance = _horizontalDragDistance;
     _horizontalDragDistance = 0;
 
     if (distance <= -36) {
-      // Swipe left → home
       Navigator.pushReplacementNamed(context, '/home_final');
     } else if (distance >= 36) {
-      // Swipe right → first active counter
-      final route = await _firstActiveCounterRoute();
-      if (mounted) Navigator.pushReplacementNamed(context, route);
+      Navigator.pushReplacementNamed(context, '/counter_1');
     }
-  }
-
-  Future<String> _firstActiveCounterRoute() async {
-    final checks = await Future.wait([
-      repository.getCounterEnabled(AppRepository.counter1Count),
-      repository.getCounterEnabled(AppRepository.counter2Count),
-      repository.getCounterEnabled(AppRepository.counter3Count),
-      repository.getCounterEnabled(AppRepository.umbrellaCount),
-    ]);
-    if (checks[0]) return '/counter_1';
-    if (checks[1]) return '/counter_2';
-    if (checks[2]) return '/counter_3';
-    if (checks[3]) return '/counter_umbrella';
-    return '/counter_1';
   }
 
   @override
