@@ -71,10 +71,15 @@ workflows:
       - name: Set up code signing
         script: xcode-project use-profiles
       - name: Build signed IPA
-        script: flutter build ipa --release
+        script: |
+          flutter build ipa --release
+          echo "--- IPA search ---"
+          find . -name "*.ipa" 2>/dev/null
+          ls -la build/ios/ipa/ 2>/dev/null || echo "build/ios/ipa/ not found"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
+      - "**/*.ipa"
     publishing:
       app_store_connect:
         api_key: $APP_STORE_CONNECT_API_KEY_P8
