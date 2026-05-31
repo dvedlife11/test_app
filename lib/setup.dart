@@ -378,7 +378,7 @@ class _SetupScreenState extends State<SetupScreen> {
 
   Future<String> _loadOnboardingResultsCsv() async {
     return await rootBundle.loadString(
-      'assets/data/onboarding_asnwer_test.csv',
+      'assets/data/onboarding_answer_test.csv',
     );
   }
 
